@@ -45,7 +45,7 @@ javascript:
             htmlString = `
                 <tr>
                     <td>
-                        <div id="stats">
+                        <div id="stats" style="width: 600px, height: 0px">
                             Elkészült: <b id="text">${0}</b> / <b>${link.length}</b>
                             <br>A kiegyenlítéshez felhasznált falvak: <b>${falvak_szama}</b><img src="graphic/buildings/main.png">
                             <br>Beérkező fa: <b>${loop()[0]}</b><img src="graphic/buildings/wood.png">
@@ -100,8 +100,8 @@ javascript:
             $('<iframe>')
                 .attr({
                     id: "frameId",
-                    height: "300",
-                    width: "600",
+                    height: "0",
+                    width: "0",
                     onload:"onloads()"
                 })
                 .css({
@@ -110,7 +110,7 @@ javascript:
                     "border-image-slice": "7 7 7 7",
                     "border-image-source": "url(https://dsen.innogamescdn.com/asset/cf2959e7/graphic/border/frame-gold-red.png)"
                 })
-                .insertBefore("#inner-border > table > tbody > tr").hide();
+                .insertBefore("#inner-border > table > tbody > tr");
             removeLoader();
         }
 
@@ -171,10 +171,13 @@ javascript:
 
         function makeItPretty() {
             iframeOngoingRemove();
-            $("#stats").slideDown(3000, function() {
-                focusToIframe();
-                bodyOnClick();
-                $("#frameId").slideDown(3000);
+            $("#frameId").animate({height: "300px"}, 1500);
+            $("#frameId").animate({width: "600px"}, 1500, function() {
+                $("#stats").slideDown(1500, function() {
+                    focusToIframe();
+                    bodyOnClick();
+                    console.log("lefutott");
+                })
             })
         }
 
