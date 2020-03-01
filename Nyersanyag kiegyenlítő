@@ -17,7 +17,6 @@ javascript:
         var url = "https://" + window.location.host + "/game.php?" + sitter + "village=" + game_data.village.id + "&mode=trader&screen=overview_villages&type=inc&page=-1";
         var link = [];
         var idx = 0;
-        
 
         function focusToIframe() {
             $('#frameId').focus();
@@ -87,7 +86,8 @@ javascript:
                 .attr({
                     id: "frameId",
                     height: "300",
-                    width: "600"
+                    width: "600",
+                    onload:"onloads()"
                 })
                 .css({
                     "borderColor": "red",
@@ -156,11 +156,10 @@ javascript:
 
         function makeItPretty() {
             iframeOngoingRemove();
-            $('#frameId').fadeIn(3000, function() {
-                $("#stats").slideDown(3000, function() {
-                    focusToIframe();
-                    bodyOnClick();
-                })
+            $("#stats").slideDown(3000, function() {
+                focusToIframe();
+                bodyOnClick();
+                $("#frameId").slideDown(3000);
             })
         }
 
@@ -471,10 +470,22 @@ javascript:
                 }
             }
             removeLinkIfNull();
-            uccso();
+            createSenderFrame();
         }
 
-        function uccso() {
+        function endOfBotAlert() {
+            $("#frameId").contents().find("#bot_check").one("DOMNodeRemoved", function(event) {
+                var elm = $(event.target);
+                if (elm.attr("id") !== undefined) {
+                    console.log("Removed element id name: " + elm.attr("id"));
+                    control();
+                    focusToIframe();
+                }
+            })
+        }
+
+
+        function control() {
             target = function() {
                 if ($("#frameId").get(0).contentWindow.location.href.match("target")) {
                     return true
@@ -496,59 +507,46 @@ javascript:
                     return false
                 }
             }
-
-            function control() {
-                if (!target() && !confirmSend()) {
-                    if (idx == link.length) {
-                        removeSenderFrame();
-                        balancingDoneMessage();
-                    } else {
-                        nextSenderFrameSrc(idx);
-                    }
-                } else if (villageItem()) {
-                    findResourcesInURL(idx);
-                    fillResources();
-                    ++idx;
-                    pressOk();
-                } else if (confirmSend()) {
-                    statsCounter(idx);
-                    pressOk();
+            if (!target() && !confirmSend()) {
+                if (idx == link.length) {
+                    removeSenderFrame();
+                    balancingDoneMessage();
+                } else {
+                    nextSenderFrameSrc(idx);
                 }
+            } else if (villageItem()) {
+                findResourcesInURL(idx);
+                fillResources();
+                ++idx;
+                pressOk();
+            } else if (confirmSend()) {
+                statsCounter(idx);
+                pressOk();
             }
-            createSenderFrame();
+        }
             // a szöveg változóban szerepel a leírás a scriptről, illetve ha beüt a botvédelem akkor ezt is jelezni fogja
-            $("#frameId").one("load", function() {
+        var once = 0;
+        function onloads() {
+            if (once == 0) {
                 createIframeText();
                 createStats();
                 hideStats();
                 makeItPretty();
-            })
-
-            function endOfBotAlert() {
-                $("#frameId").contents().find("#bot_check").one("DOMNodeRemoved", function(event) {
-                    var elm = $(event.target);
-                    if (elm.attr("id") !== undefined) {
-                        console.log("Removed element id name: " + elm.attr("id"));
-                        control();
-                        focusToIframe();
-                    }
-                })
-            }
-            $('#frameId').load(function() {
                 console.log("loaded");
-                $(this).contents().find("body").one('keydown', function(event) {
-                    switch (event.keyCode) {
-                        case 17:
-                            if (botCheck()) {
-                                botAlert();
-                                endOfBotAlert();
-                                console.log("botAlert");
-                            } else {
-                                control();
-                                console.log("control");
-                            }
-                    }
-                })
+                once++;
+            }
+            $("iframe#frameId").contents().find("body").one('keydown', function(event) {
+                switch (event.keyCode) {
+                    case 17:
+                        if (botCheck()) {
+                            botAlert();
+                            endOfBotAlert();
+                            console.log("botAlert");
+                        } else {
+                            control();
+                            console.log("control");
+                        }
+                }
             })
         }
         console.log(link);
