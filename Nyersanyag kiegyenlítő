@@ -81,7 +81,7 @@ javascript:
         }
 
         function removeSenderFrame() {
-            $('iframe').remove();
+            $("iframe#frameId").remove();
         }
 
         function pressOk() {
